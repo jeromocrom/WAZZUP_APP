@@ -1,0 +1,61 @@
+[
+  {
+    "id": "e1",
+    "title": "DJ Set Techno @ Warehouse",
+    "type": "dj_set",
+    "startsAt": "2025-09-21T23:00:00Z",
+    "venue": "Warehouse",
+    "city": "Montpellier",
+    "lat": 43.611,
+    "lng": 3.877,
+    "states": [
+      "trending",
+      "live"
+    ],
+    "hype": 0.82,
+    "priceFrom": 12,
+    "isBoosted": true
+  },
+  {
+    "id": "e2",
+    "title": "Concert Indie @ RockIt",
+    "type": "concert",
+    "startsAt": "2025-09-22T19:30:00Z",
+    "venue": "RockIt",
+    "city": "Montpellier",
+    "lat": 43.604,
+    "lng": 3.88,
+    "states": [
+      "verified"
+    ],
+    "hype": 0.58,
+    "priceFrom": 18
+  },
+  {
+    "id": "e3",
+    "title": "March\u00e9 Street Food",
+    "type": "food_market",
+    "startsAt": "2025-09-22T10:00:00Z",
+    "venue": "Place du March\u00e9",
+    "city": "Montpellier",
+    "lat": 43.609,
+    "lng": 3.873,
+    "states": [],
+    "hype": 0.37,
+    "priceFrom": 0
+  },
+  {
+    "id": "e4",
+    "title": "After au D\u00f4me",
+    "type": "after",
+    "startsAt": "2025-09-22T05:00:00Z",
+    "venue": "Le D\u00f4me",
+    "city": "Montpellier",
+    "lat": 43.615,
+    "lng": 3.879,
+    "states": [
+      "premium"
+    ],
+    "hype": 0.66
+  }
+]

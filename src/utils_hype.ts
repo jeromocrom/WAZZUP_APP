@@ -1,0 +1,1 @@
+export function computeHype(f:number,s:number,c:number,p:number){const score=0.4*f+0.3*s+0.2*c+0.1*p;return Math.max(0,Math.min(1,score));}

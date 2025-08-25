@@ -1,0 +1,3 @@
+export type MarkerState='live'|'trending'|'verified'|'premium';
+export type EventType='soiree_club'|'concert'|'dj_set'|'festival'|'after'|'expo_art'|'standup'|'show'|'food_market'|'sport'|'networking'|'student'|'photo_video';
+export type WazzupEvent={ id:string; title:string; type:EventType; startsAt:string; endsAt?:string; venue:string; city:string; lat:number; lng:number; states:MarkerState[]; hype?:number; priceFrom?:number; isBoosted?:boolean; };
