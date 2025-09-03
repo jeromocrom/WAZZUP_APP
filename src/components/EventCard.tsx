@@ -1,8 +1,48 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
-import type { WazzupEvent } from '@/types';
+import type { WazzupEvent, EventType } from '@/types';
 import FavoriteStar from '@/components/FavoriteStar';
 import { adaptEvent } from '@/utils/eventAdapter';
+import { tokens } from '@/theme/tokens';
+
+// Event type icon mapping with typography-friendly icons
+function getEventTypeIcon(type: EventType | string | null): string {
+  const iconMap: Record<string, string> = {
+    soiree_club: '🏢',
+    concert: '🎤',
+    dj_set: '🎧',
+    festival: '🎪',
+    after: '🌙',
+    expo_art: '🎨',
+    standup: '🎭',
+    show: '🎬',
+    food_market: '🍽️',
+    sport: '⚽',
+    networking: '🤝',
+    student: '🎓',
+    photo_video: '📸'
+  };
+  return iconMap[type || ''] || '🎉';
+}
+
+function getEventTypeLabel(type: EventType | string | null): string {
+  const labelMap: Record<string, string> = {
+    soiree_club: 'SOIRÉE',
+    concert: 'CONCERT',
+    dj_set: 'DJ SET',
+    festival: 'FESTIVAL',
+    after: 'AFTER',
+    expo_art: 'EXPO',
+    standup: 'STAND-UP',
+    show: 'SHOW',
+    food_market: 'FOOD',
+    sport: 'SPORT',
+    networking: 'NETWORK',
+    student: 'STUDENT',
+    photo_video: 'PHOTO'
+  };
+  return labelMap[type || ''] || 'ÉVÉNEMENT';
+}
 
 interface EventCardProps {
   ev: WazzupEvent | any;
@@ -40,7 +80,10 @@ function EventCard({
       {cover ? (
         <Image source={{ uri: cover }} style={styles.img} resizeMode="cover" />
       ) : (
-        <View style={[styles.img, { alignItems:'center', justifyContent:'center' }]}><Text>🎉</Text></View>
+        <View style={[styles.img, styles.fallback]}>
+          <Text style={styles.fallbackIcon}>{getEventTypeIcon(a.type || ev.type)}</Text>
+          <Text style={styles.fallbackText}>{getEventTypeLabel(a.type || ev.type)}</Text>
+        </View>
       )}
       <View style={styles.info}>
         <Text style={styles.title} numberOfLines={1}>{a.title}</Text>
@@ -67,5 +110,20 @@ const styles = StyleSheet.create({
   info:{ paddingHorizontal:12, paddingVertical:10, gap:4 },
   title:{ fontWeight:'900' },
   meta:{ fontWeight:'700', color:'#333', fontSize:12 },
-  star:{ position:'absolute', top:8, right:8 }
+  star:{ position:'absolute', top:8, right:8 },
+  fallback: {
+    backgroundColor: tokens.color.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8
+  },
+  fallbackIcon: {
+    fontSize: 32
+  },
+  fallbackText: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#000',
+    textAlign: 'center'
+  }
 });
