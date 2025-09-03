@@ -18,6 +18,7 @@ export default function MapScreen({ navigation }: any){
   const [active, setActive] = useState<EventType | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<WazzupEvent | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [centerEventId, setCenterEventId] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>({ priceMax: 50, distanceKm: null, when: 'any' });
   const [showFilters, setShowFilters] = useState(false);
   const [storyOpen, setStoryOpen] = useState(false);
@@ -42,7 +43,12 @@ export default function MapScreen({ navigation }: any){
   // Callback optimizations
   const handleMarkerPress = useCallback((id: string) => {
     const ev = data.find(e => e.id === id) || all.find(e => e.id === id);
-    if (ev) setSelectedEvent(ev);
+    if (ev) {
+      setSelectedEvent(ev);
+      setCenterEventId(id);
+      // Reset centering after a short delay to allow for re-centering on same marker
+      setTimeout(() => setCenterEventId(null), 100);
+    }
   }, [data, all]);
 
   const handleSearchPress = useCallback(() => {
@@ -83,6 +89,8 @@ export default function MapScreen({ navigation }: any){
       <SearchHeader
         topOffset={top}
         placeholder="Recherche"
+        activeType={active}
+        onChangeType={setActive}
         onPressSearch={handleSearchPress}
         onPressFilters={handleFiltersPress}
         onMeasuredHeight={setHeaderH}
@@ -91,6 +99,7 @@ export default function MapScreen({ navigation }: any){
       <WorldMapWeb
         events={data}
         onMarkerPress={handleMarkerPress}
+        centerOnEvent={centerEventId}
       />
 
       <CardCarousel

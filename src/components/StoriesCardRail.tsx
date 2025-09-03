@@ -47,14 +47,14 @@ export default function StoriesCardRail({
 const styles = StyleSheet.create({
   wrap:{ paddingHorizontal: 12 },
   cardShell:{
-    borderWidth: 2, borderColor:'#000', borderRadius: 16, backgroundColor:'#FFF',
-    paddingVertical: 10
+    borderWidth: 1, borderColor:'rgba(0,0,0,0.1)', borderRadius: 12, backgroundColor:'rgba(255,255,255,0.95)',
+    paddingVertical: 8
   },
   card:{
-    width: 160, height: 140, borderRadius: 14, borderWidth: 1.5, borderColor:'#000', overflow:'hidden', backgroundColor:'#FFF'
+    width: 140, height: 120, borderRadius: 10, borderWidth: 1, borderColor:'rgba(0,0,0,0.15)', overflow:'hidden', backgroundColor:'#FFF'
   },
-  img:{ width:'100%', height:'65%' },
-  info:{ flex:1, paddingHorizontal:8, paddingVertical:6 },
-  title:{ fontWeight:'900' },
-  by:{ fontWeight:'700', color:'#333', fontSize:12 }
+  img:{ width:'100%', height:'60%' },
+  info:{ flex:1, paddingHorizontal:6, paddingVertical:4 },
+  title:{ fontWeight:'700', fontSize:12 },
+  by:{ fontWeight:'600', color:'#555', fontSize:10 }
 });

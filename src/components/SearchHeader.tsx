@@ -1,8 +1,7 @@
 import React, { useCallback } from 'react';
 import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-type EventType = 'party' | 'concert' | 'dj' | 'exhibition' | 'festival' | 'other';
+import type { EventType } from '@/types';
 
 type QuickTab = { key: EventType | 'all'; label: string };
 
@@ -19,9 +18,9 @@ type Props = {
 
 const DEFAULT_TABS: QuickTab[] = [
   { key:'all', label:'Tous' },
-  { key:'party', label:'Soirées' },
+  { key:'soiree_club', label:'Soirées' },
   { key:'concert', label:'Concerts' },
-  { key:'dj', label:'DJ' },
+  { key:'dj_set', label:'DJ' },
   { key:'festival', label:'Festival' },
 ];
 
