@@ -57,29 +57,68 @@ export default function EventDetailsSheet({
   const insets = useSafeAreaInsets();
   const translateY = useRef(new Animated.Value(SCREEN_H)).current;
   const [stickyH, setStickyH] = useState(100);
+  const [isFullyOpen, setIsFullyOpen] = useState(false);
 
   const a = useMemo(()=> (event ? adaptEvent(event) : null), [event]);
   const SNAP_FULL = useMemo(() => Math.max(insets.top + 12, 64), [insets.top]);
+  const SNAP_HALF = useMemo(() => SCREEN_H * 0.5, []);
 
   useEffect(() => {
-    Animated.timing(translateY, {
-      toValue: visible ? SNAP_FULL : SCREEN_H,
-      duration: visible ? 240 : 220,
-      easing: visible ? Easing.out(Easing.cubic) : Easing.in(Easing.cubic),
-      useNativeDriver: true
-    }).start();
-  }, [visible, SNAP_FULL]);
+    if (visible) {
+      setIsFullyOpen(false);
+      Animated.timing(translateY, {
+        toValue: SNAP_HALF,
+        duration: 240,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true
+      }).start();
+    } else {
+      Animated.timing(translateY, {
+        toValue: SCREEN_H,
+        duration: 220,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true
+      }).start(() => setIsFullyOpen(false));
+    }
+  }, [visible, SNAP_HALF]);
 
   const pan = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dy) > Math.abs(g.dx) && Math.abs(g.dy) > 6,
       onPanResponderMove: (_, g) => {
-        const next = Math.max(SNAP_FULL, Math.min(SCREEN_H, SNAP_FULL + g.dy));
+        const currentPos = isFullyOpen ? SNAP_FULL : SNAP_HALF;
+        const next = Math.max(SNAP_FULL, Math.min(SCREEN_H, currentPos + g.dy));
         translateY.setValue(next);
       },
       onPanResponderRelease: (_, g) => {
-        if (g.vy > 1.2 || (SNAP_FULL + g.dy) > SCREEN_H - 120) { onClose(); return; }
-        Animated.spring(translateY, { toValue: SNAP_FULL, useNativeDriver: true, damping: 18, stiffness: 220, mass: 0.8 }).start();
+        const currentPos = isFullyOpen ? SNAP_FULL : SNAP_HALF;
+        const finalPos = currentPos + g.dy;
+        
+        // Close if dragged down significantly
+        if (g.vy > 1.2 || finalPos > SCREEN_H - 120) { 
+          onClose(); 
+          return; 
+        }
+        
+        // Determine target position
+        let targetPos = SNAP_HALF;
+        if (finalPos < (SNAP_HALF + SNAP_FULL) / 2) {
+          // Dragged up towards full
+          targetPos = SNAP_FULL;
+          setIsFullyOpen(true);
+        } else {
+          // Stay at or return to half
+          targetPos = SNAP_HALF;
+          setIsFullyOpen(false);
+        }
+        
+        Animated.spring(translateY, { 
+          toValue: targetPos, 
+          useNativeDriver: true, 
+          damping: 18, 
+          stiffness: 220, 
+          mass: 0.8 
+        }).start();
       },
     })
   ).current;
@@ -399,10 +438,13 @@ const styles = StyleSheet.create({
   rsvpRow:{ flexDirection:'row', gap:8 },
   rsvpBtn:{ flex:1, height:42, borderRadius:12, alignItems:'center', justifyContent:'center', borderWidth:1, borderColor:'#000', backgroundColor:'#FFF' },
   rsvpActive:{ backgroundColor:'#FFD300' },
+  rsvpTxt:{ fontWeight:'900' },
 
   cta:{ height:48, borderRadius:14, alignItems:'center', justifyContent:'center', borderWidth:1, borderColor:'#000' },
   ctaPrimary:{ backgroundColor:'#FFD300' },
   ctaPrimaryTxt:{ fontWeight:'900' },
   ctaGhost:{ backgroundColor:'#FFF' },
   ctaGhostTxt:{ fontWeight:'900' },
+
+  desc:{ fontWeight:'700', lineHeight:20 },
 });

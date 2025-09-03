@@ -6,6 +6,7 @@ import type { WazzupEvent } from '@/types';
 type Props = {
   events: WazzupEvent[];
   onMarkerPress?: (id: string)=> void;
+  centerOnEvent?: string | null;
 };
 
 const HTML = `
@@ -50,7 +51,7 @@ const HTML = `
     /* Remove event type specific colors - using uniform yellow circles */
     .pin.shape-hex { border-radius: 50%; }
     .pin .badge {
-      position: absolute; top: -6px; right: -6px;
+      position: absolute; top: -3px; right: -3px;
       background: var(--wz-white); border: 2px solid var(--wz-black);
       border-radius: 999px; padding: 3px 7px; font-size: 9px; font-weight: 900;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -191,6 +192,14 @@ const HTML = `
       map.fitBounds(b.pad(0.25), { animate: true });
     }
 
+    function centerOnEvent(eventId){
+      const evs = window.__EVS__ || [];
+      const ev = evs.find(e => e.id === eventId);
+      if (ev) {
+        map.setView([ev.lat, ev.lng], Math.max(map.getZoom(), 14), { animate: true });
+      }
+    }
+
     // Perf: couper les pulses quand on est très dézommé
     function updatePulseState(){
       const low = map.getZoom() <= 4;
@@ -199,14 +208,14 @@ const HTML = `
     map.on('zoomend', updatePulseState);
     updatePulseState();
 
-    window.__WZP__ = { renderMarkers, fitAll };
+    window.__WZP__ = { renderMarkers, fitAll, centerOnEvent };
     post({ type:'ready' });
   </script>
 </body>
 </html>
 `;
 
-function WorldMapWeb({ events, onMarkerPress }: Props){
+function WorldMapWeb({ events, onMarkerPress, centerOnEvent }: Props){
   const ref = useRef<WebView>(null);
 
   const handleMessage = useCallback((e: any) => {
@@ -223,11 +232,23 @@ function WorldMapWeb({ events, onMarkerPress }: Props){
     ref.current.injectJavaScript(js);
   }, [events]);
 
+  const centerMap = useCallback(() => {
+    if (!ref.current || !centerOnEvent) return;
+    const js = `window.__WZP__ && window.__WZP__.centerOnEvent('${centerOnEvent}'); true;`;
+    ref.current.injectJavaScript(js);
+  }, [centerOnEvent]);
+
   const webViewStyle = useMemo(() => ({ flex: 1 }), []);
 
   useEffect(() => { 
     sync(); 
   }, [sync]);
+
+  useEffect(() => {
+    if (centerOnEvent) {
+      centerMap();
+    }
+  }, [centerMap, centerOnEvent]);
 
   return (
     <WebView
