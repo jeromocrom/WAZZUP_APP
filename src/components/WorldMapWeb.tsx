@@ -31,51 +31,41 @@ const HTML = `
       position: relative;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
       font-weight: 900;
-      color: var(--wz-white);
-      background: linear-gradient(135deg, #3B82F6, #1E40AF);
-      border: 2px solid var(--wz-white);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      padding: 8px 12px;
+      color: var(--wz-black);
+      background: var(--wz-yellow);
+      border: 2px solid var(--wz-black);
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       transform: translate(-50%, -100%);
-      white-space: nowrap;
       user-select: none;
       will-change: transform;
-      backdrop-filter: blur(8px);
     }
-    .pin .em { font-size: 16px; line-height: 1; }
-    .pin .lab { font-size: 11px; line-height: 1; font-weight: 800; }
-    .pin.shape-pill { border-radius: 999px; }
-    .pin.shape-diamond { border-radius: 16px; transform: translate(-50%, -100%) rotate(-5deg); }
-    .pin.shape-square { border-radius: 14px; }
-    .pin.shape-hex { border-radius: 16px; clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%); }
+    .pin .em { font-size: 18px; line-height: 1; }
+    .pin .lab { display: none; } /* Hide text labels */
     
-    /* Event type specific colors */
-    .pin[data-type="dj_set"] { background: linear-gradient(135deg, #8B5CF6, #6D28D9); }
-    .pin[data-type="concert"] { background: linear-gradient(135deg, #EF4444, #B91C1C); }
-    .pin[data-type="party"] { background: linear-gradient(135deg, #F59E0B, #D97706); }
-    .pin[data-type="after"] { background: linear-gradient(135deg, #1F2937, #111827); }
-    .pin[data-type="food_market"] { background: linear-gradient(135deg, #10B981, #047857); }
-    .pin[data-type="expo_art"] { background: linear-gradient(135deg, #3B82F6, #1D4ED8); }
-    .pin.shape-hex { border-radius: 12px; clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%); }
+    /* Remove event type specific colors - using uniform yellow circles */
+    .pin.shape-hex { border-radius: 50%; }
     .pin .badge {
       position: absolute; top: -6px; right: -6px;
-      background: var(--wz-white); border: 2px solid var(--wz-white);
+      background: var(--wz-white); border: 2px solid var(--wz-black);
       border-radius: 999px; padding: 3px 7px; font-size: 9px; font-weight: 900;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       color: var(--wz-black);
     }
     .pin.live .badge { 
-      background: linear-gradient(135deg, #EF4444, #DC2626); 
+      background: var(--wz-red); 
       color: var(--wz-white); 
-      border-color: var(--wz-white); 
+      border-color: var(--wz-black); 
       animation: pulse 2s infinite;
     }
     .pin.trending .badge { 
-      background: linear-gradient(135deg, #F59E0B, #D97706);
-      color: var(--wz-white);
-      border-color: var(--wz-white);
+      background: var(--wz-yellow);
+      color: var(--wz-black);
+      border-color: var(--wz-black);
     }
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
@@ -161,22 +151,22 @@ const HTML = `
     map.addLayer(cluster);
 
     const TYPE_META = {
-      'dj_set':   { label:'DJ',     shape:'hex',     emoji:'🎧' },
-      'concert':  { label:'Concert',shape:'pill',    emoji:'🎤' },
-      'party':    { label:'Soirée', shape:'diamond', emoji:'🎉' },
-      'after':    { label:'After',  shape:'square',  emoji:'🌙' },
-      'food_market': { label:'Food',shape:'pill',    emoji:'🍔' },
-      'expo_art': { label:'Expo',   shape:'square',  emoji:'🖼️' }
+      'dj_set':      { label:'DJ',     emoji:'🎧' },
+      'concert':     { label:'Concert', emoji:'🎤' },
+      'party':       { label:'Soirée', emoji:'🎉' },
+      'after':       { label:'After',  emoji:'🌙' },
+      'food_market': { label:'Food',   emoji:'🍔' },
+      'expo_art':    { label:'Expo',   emoji:'🎨' }
     };
 
     function buildPinHtml(ev){
-      const meta = TYPE_META[ev.type] || { label: 'Event', shape:'pill', emoji:'📍' };
+      const meta = TYPE_META[ev.type] || { label: 'Event', emoji:'📍' };
       const states = (ev.states || []).join(' ');
       let badge = '';
       if (states.includes('live')) badge = '<span class="badge">LIVE</span>';
       else if (states.includes('trending')) badge = '<span class="badge">🔥</span>';
       else if (states.includes('verified')) badge = '<span class="badge">✔️</span>';
-      return '<div class="pin '+meta.shape+' '+states+'" data-type="'+ev.type+'"><span class="em">'+meta.emoji+'</span><span class="lab">'+meta.label+'</span>'+badge+'</div>';
+      return '<div class="pin '+states+'" data-type="'+ev.type+'"><span class="em">'+meta.emoji+'</span><span class="lab">'+meta.label+'</span>'+badge+'</div>';
     }
 
     function asDivIcon(ev){
