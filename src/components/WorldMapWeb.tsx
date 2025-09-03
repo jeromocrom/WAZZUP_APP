@@ -33,30 +33,54 @@ const HTML = `
       align-items: center;
       gap: 6px;
       font-weight: 900;
-      color: var(--wz-black);
-      background: var(--wz-yellow);
-      border: 2px solid var(--wz-black);
-      box-shadow: 0 1px 0 var(--wz-black);
-      padding: 6px 10px;
+      color: var(--wz-white);
+      background: linear-gradient(135deg, #3B82F6, #1E40AF);
+      border: 2px solid var(--wz-white);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      padding: 8px 12px;
       transform: translate(-50%, -100%);
       white-space: nowrap;
       user-select: none;
       will-change: transform;
+      backdrop-filter: blur(8px);
     }
-    .pin .em { font-size: 14px; line-height: 1; }
-    .pin .lab { font-size: 12px; line-height: 1; }
+    .pin .em { font-size: 16px; line-height: 1; }
+    .pin .lab { font-size: 11px; line-height: 1; font-weight: 800; }
     .pin.shape-pill { border-radius: 999px; }
-    .pin.shape-diamond { border-radius: 10px; transform: translate(-50%, -100%) rotate(-10deg); }
-    .pin.shape-square { border-radius: 12px; }
+    .pin.shape-diamond { border-radius: 16px; transform: translate(-50%, -100%) rotate(-5deg); }
+    .pin.shape-square { border-radius: 14px; }
+    .pin.shape-hex { border-radius: 16px; clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%); }
+    
+    /* Event type specific colors */
+    .pin[data-type="dj_set"] { background: linear-gradient(135deg, #8B5CF6, #6D28D9); }
+    .pin[data-type="concert"] { background: linear-gradient(135deg, #EF4444, #B91C1C); }
+    .pin[data-type="party"] { background: linear-gradient(135deg, #F59E0B, #D97706); }
+    .pin[data-type="after"] { background: linear-gradient(135deg, #1F2937, #111827); }
+    .pin[data-type="food_market"] { background: linear-gradient(135deg, #10B981, #047857); }
+    .pin[data-type="expo_art"] { background: linear-gradient(135deg, #3B82F6, #1D4ED8); }
     .pin.shape-hex { border-radius: 12px; clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%); }
     .pin .badge {
-      position: absolute; top: -8px; right: -8px;
-      background: var(--wz-white); border: 2px solid var(--wz-black);
-      border-radius: 999px; padding: 2px 6px; font-size: 10px; font-weight: 900;
-      box-shadow: 0 1px 0 var(--wz-black);
+      position: absolute; top: -6px; right: -6px;
+      background: var(--wz-white); border: 2px solid var(--wz-white);
+      border-radius: 999px; padding: 3px 7px; font-size: 9px; font-weight: 900;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      color: var(--wz-black);
     }
-    .pin.live .badge { background: var(--wz-red); color:#fff; border-color:#000; }
-    .pin.trending .badge { background: var(--wz-yellow); }
+    .pin.live .badge { 
+      background: linear-gradient(135deg, #EF4444, #DC2626); 
+      color: var(--wz-white); 
+      border-color: var(--wz-white); 
+      animation: pulse 2s infinite;
+    }
+    .pin.trending .badge { 
+      background: linear-gradient(135deg, #F59E0B, #D97706);
+      color: var(--wz-white);
+      border-color: var(--wz-white);
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
 
     /* --- Pulse animation (live/trending) --- */
     @keyframes wz-pulse {
@@ -152,7 +176,7 @@ const HTML = `
       if (states.includes('live')) badge = '<span class="badge">LIVE</span>';
       else if (states.includes('trending')) badge = '<span class="badge">🔥</span>';
       else if (states.includes('verified')) badge = '<span class="badge">✔️</span>';
-      return '<div class="pin '+meta.shape+' '+states+'"><span class="em">'+meta.emoji+'</span><span class="lab">'+meta.label+'</span>'+badge+'</div>';
+      return '<div class="pin '+meta.shape+' '+states+'" data-type="'+ev.type+'"><span class="em">'+meta.emoji+'</span><span class="lab">'+meta.label+'</span>'+badge+'</div>';
     }
 
     function asDivIcon(ev){

@@ -14,7 +14,12 @@
     ],
     "hype": 0.82,
     "priceFrom": 12,
-    "isBoosted": true
+    "isBoosted": true,
+    "cover": "https://images.unsplash.com/photo-1571266028243-d220c842be7b?w=400&h=300&fit=crop",
+    "photos": [
+      "https://images.unsplash.com/photo-1571266028243-d220c842be7b?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop"
+    ]
   },
   {
     "id": "e2",
@@ -29,7 +34,12 @@
       "verified"
     ],
     "hype": 0.58,
-    "priceFrom": 18
+    "priceFrom": 18,
+    "cover": "https://images.unsplash.com/photo-1493676304819-0d7a8d026dcf?w=400&h=300&fit=crop",
+    "photos": [
+      "https://images.unsplash.com/photo-1493676304819-0d7a8d026dcf?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=400&h=300&fit=crop"
+    ]
   },
   {
     "id": "e3",
@@ -42,7 +52,12 @@
     "lng": 3.873,
     "states": [],
     "hype": 0.37,
-    "priceFrom": 0
+    "priceFrom": 0,
+    "cover": "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop",
+    "photos": [
+      "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop"
+    ]
   },
   {
     "id": "e4",
@@ -56,6 +71,11 @@
     "states": [
       "premium"
     ],
-    "hype": 0.66
+    "hype": 0.66,
+    "cover": "https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=400&h=300&fit=crop",
+    "photos": [
+      "https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=400&h=300&fit=crop",
+      "https://images.unsplash.com/photo-1545224144-b38cd309ef69?w=400&h=300&fit=crop"
+    ]
   }
 ]
