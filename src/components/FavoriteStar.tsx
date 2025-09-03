@@ -1,22 +1,30 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-export default function FavoriteStar({
+interface FavoriteStarProps {
+  active: boolean;
+  onToggle?: () => void;
+  size?: number;
+}
+
+function FavoriteStar({
   active,
   onToggle,
   size = 20
-}: {
-  active: boolean;
-  onToggle?: ()=>void;
-  size?: number;
-}){
+}: FavoriteStarProps) {
+  const handleToggle = useCallback(() => {
+    onToggle?.();
+  }, [onToggle]);
+
   return (
-    <Pressable onPress={onToggle} hitSlop={10} style={[styles.wrap, active && styles.activeWrap]}>
+    <Pressable onPress={handleToggle} hitSlop={10} style={[styles.wrap, active && styles.activeWrap]}>
       <Feather name="star" size={size} color="#000" />
     </Pressable>
   );
 }
+
+export default React.memo(FavoriteStar);
 
 const styles = StyleSheet.create({
   wrap:{

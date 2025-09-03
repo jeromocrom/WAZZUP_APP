@@ -1,30 +1,42 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
 import type { WazzupEvent } from '@/types';
 import FavoriteStar from '@/components/FavoriteStar';
 import { adaptEvent } from '@/utils/eventAdapter';
 
-export default function EventCard({
+interface EventCardProps {
+  ev: WazzupEvent | any;
+  onPress?: (ev: any) => void;
+  onToggleFavorite?: (id: string, value: boolean) => void;
+}
+
+function EventCard({
   ev,
   onPress,
   onToggleFavorite
-}: {
-  ev: WazzupEvent | any;
-  onPress?: (ev: any)=>void;
-  onToggleFavorite?: (id: string, value: boolean)=>void;
-}){
+}: EventCardProps){
   const a = useMemo(()=> adaptEvent(ev), [ev]);
   const [fav, setFav] = useState<boolean>(!!a.isFavorite);
-  const cover = a.cover || (a.photos && a.photos[0]);
+  const cover = useMemo(() => a.cover || (a.photos && a.photos[0]), [a.cover, a.photos]);
 
-  function toggle(){
+  const toggle = useCallback(() => {
     const nv = !fav;
     setFav(nv);
     onToggleFavorite?.(a.id, nv);
-  }
+  }, [fav, onToggleFavorite, a.id]);
+
+  const handlePress = useCallback(() => {
+    onPress?.(ev);
+  }, [onPress, ev]);
+
+  const metaText = useMemo(() => {
+    const venue = a.venue ? a.venue : '';
+    const city = a.city ? (a.venue ? ' • ' : '') + a.city : '';
+    return venue + city;
+  }, [a.venue, a.city]);
 
   return (
-    <Pressable onPress={()=> onPress?.(ev)} style={styles.card}>
+    <Pressable onPress={handlePress} style={styles.card}>
       {cover ? (
         <Image source={{ uri: cover }} style={styles.img} resizeMode="cover" />
       ) : (
@@ -33,7 +45,7 @@ export default function EventCard({
       <View style={styles.info}>
         <Text style={styles.title} numberOfLines={1}>{a.title}</Text>
         <Text style={styles.meta} numberOfLines={1}>
-          {a.venue ? a.venue : ''}{a.city ? (a.venue ? ' • ' : '') + a.city : ''}
+          {metaText}
         </Text>
       </View>
 
@@ -44,6 +56,8 @@ export default function EventCard({
     </Pressable>
   );
 }
+
+export default React.memo(EventCard);
 
 const styles = StyleSheet.create({
   card:{
