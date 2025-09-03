@@ -61,7 +61,18 @@ function toProfiles(arr: any): (AdaptedProfile | string)[] | undefined {
   return undefined;
 }
 
+// Cache for adapted events to avoid recomputation
+const adaptEventCache = new Map<string, AdaptedEvent>();
+
 export function adaptEvent(raw: any, fallbackIndex?: number): AdaptedEvent {
+  // Create a cache key based on the raw data
+  const cacheKey = raw?.id || raw?._id || raw?.uuid || (fallbackIndex != null ? `fallback_${fallbackIndex}` : JSON.stringify(raw));
+  
+  // Return cached result if available
+  if (adaptEventCache.has(cacheKey)) {
+    return adaptEventCache.get(cacheKey)!;
+  }
+
   const id = raw?.id || raw?._id || raw?.uuid || raw?.key || (raw?.title && String(raw.title).toLowerCase().replace(/\s+/g, '_')) || (fallbackIndex != null ? String(fallbackIndex) : String(Math.random()));
   const title = raw?.title || raw?.name || raw?.eventName || 'Évènement';
   const cover = pickImage(raw?.cover || raw?.photo || raw?.image || (raw?.photos && raw.photos[0]) || (raw?.media && raw.media[0]));
@@ -78,7 +89,17 @@ export function adaptEvent(raw: any, fallbackIndex?: number): AdaptedEvent {
   const type = raw?.type || raw?.category || raw?.tag || null;
   const isFavorite = !!raw?.isFavorite;
 
-  return {
+  const result = {
     id, title, cover, photos, city, venue, address, datetimeFrom, datetimeTo, priceFrom, organizer, artists, stories, type, isFavorite
   };
+
+  // Cache the result
+  adaptEventCache.set(cacheKey, result);
+  
+  return result;
+}
+
+// Function to clear cache if needed (e.g., for memory management)
+export function clearAdaptEventCache() {
+  adaptEventCache.clear();
 }

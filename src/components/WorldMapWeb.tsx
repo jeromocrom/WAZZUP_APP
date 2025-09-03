@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 import { Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import type { WazzupEvent } from '@/types';
@@ -192,23 +192,28 @@ const HTML = `
 </html>
 `;
 
-export default function WorldMapWeb({ events, onMarkerPress }: Props){
+function WorldMapWeb({ events, onMarkerPress }: Props){
   const ref = useRef<WebView>(null);
 
-  function handleMessage(e: any){
+  const handleMessage = useCallback((e: any) => {
     try{
       const data = JSON.parse(e?.nativeEvent?.data ?? '{}');
       if (data?.type === 'press' && data.id) onMarkerPress?.(data.id);
     }catch{}
-  }
+  }, [onMarkerPress]);
 
-  function sync(){
+  const sync = useCallback(() => {
+    if (!ref.current) return;
     const payload = JSON.stringify(events);
     const js = `window.__WZP__ && (window.__WZP__.renderMarkers(${payload}), window.__WZP__.fitAll()); true;`;
-    ref.current?.injectJavaScript(js);
-  }
+    ref.current.injectJavaScript(js);
+  }, [events]);
 
-  useEffect(() => { sync(); }, [events]);
+  const webViewStyle = useMemo(() => ({ flex: 1 }), []);
+
+  useEffect(() => { 
+    sync(); 
+  }, [sync]);
 
   return (
     <WebView
@@ -219,7 +224,7 @@ export default function WorldMapWeb({ events, onMarkerPress }: Props){
       javaScriptEnabled
       domStorageEnabled
       startInLoadingState
-      style={{ flex:1 }}
+      style={webViewStyle}
       onLoadEnd={sync}
       setSupportMultipleWindows={false}
       automaticallyAdjustContentInsets={false}
@@ -228,3 +233,5 @@ export default function WorldMapWeb({ events, onMarkerPress }: Props){
     />
   );
 }
+
+export default React.memo(WorldMapWeb);

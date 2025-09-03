@@ -1,8 +1,19 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function HypePill({ score, compact=false }:{ score: number; compact?: boolean; }){
-  const lvl = score > 200 ? 'very' : score > 120 ? 'high' : score > 60 ? 'mid' : 'low';
+interface HypePillProps {
+  score: number;
+  compact?: boolean;
+}
+
+function HypePill({ score, compact = false }: HypePillProps) {
+  const lvl = useMemo(() => {
+    if (score > 200) return 'very';
+    if (score > 120) return 'high';
+    if (score > 60) return 'mid';
+    return 'low';
+  }, [score]);
+
   return (
     <View style={[styles.pill, styles[lvl]]}>
       <Text style={styles.txt}>🔥 {score}</Text>
@@ -10,6 +21,8 @@ export default function HypePill({ score, compact=false }:{ score: number; compa
     </View>
   );
 }
+
+export default React.memo(HypePill);
 
 const styles = StyleSheet.create({
   pill:{

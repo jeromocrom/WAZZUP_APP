@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -25,7 +25,7 @@ const DEFAULT_TABS: QuickTab[] = [
   { key:'festival', label:'Festival' },
 ];
 
-export default function SearchHeader({
+function SearchHeader({
   topOffset=0,
   placeholder='Recherche',
   onPressSearch,
@@ -88,3 +88,5 @@ const styles = StyleSheet.create({
   chipTxt:{ fontWeight:'900', color:'#000' },
   chipTxtActive:{}
 });
+
+export default React.memo(SearchHeader);

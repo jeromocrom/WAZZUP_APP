@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { View } from 'react-native';
 import { useOverlayOffsets } from '@/utils/overlay';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -25,42 +25,79 @@ export default function MapScreen({ navigation }: any){
 
   const [headerH, setHeaderH] = useState(0);
 
-  const all = events as WazzupEvent[];
-  const data = useMemo(()=> {
-    let base = active? all.filter(d => d.type===active): all;
-    if (typeof filters.priceMax === 'number') base = base.filter(d => (d.priceFrom ?? 0) <= filters.priceMax!);
+  const all = useMemo(() => events as WazzupEvent[], []);
+  
+  // Optimize data filtering with better memoization
+  const data = useMemo(() => {
+    let base = active ? all.filter(d => d.type === active) : all;
+    if (typeof filters.priceMax === 'number') {
+      base = base.filter(d => (d.priceFrom ?? 0) <= filters.priceMax!);
+    }
     return base;
-  }, [all, active, filters]);
+  }, [all, active, filters.priceMax]);
 
   // Place le carousel plus BAS (près du bord), tout en évitant le bouton Home
-  const carouselBottom = Math.max(8, insets.bottom + 8);
+  const carouselBottom = useMemo(() => Math.max(8, insets.bottom + 8), [insets.bottom]);
+
+  // Callback optimizations
+  const handleMarkerPress = useCallback((id: string) => {
+    const ev = data.find(e => e.id === id) || all.find(e => e.id === id);
+    if (ev) setSelectedEvent(ev);
+  }, [data, all]);
+
+  const handleSearchPress = useCallback(() => {
+    navigateToSearchModal(navigation);
+  }, [navigation]);
+
+  const handleFiltersPress = useCallback(() => {
+    setShowFilters(true);
+  }, []);
+
+  const handleCloseFilters = useCallback(() => {
+    setShowFilters(false);
+  }, []);
+
+  const handleApplyFilters = useCallback(() => {
+    setShowFilters(false);
+  }, []);
+
+  const handleCloseEvent = useCallback(() => {
+    setSelectedEvent(null);
+  }, []);
+
+  const handleCarouselPress = useCallback((ev: WazzupEvent) => {
+    setSelectedEvent(ev);
+  }, []);
+
+  const handleOpenStory = useCallback((i: number) => {
+    setStoryIndex(i);
+    setStoryOpen(true);
+  }, []);
+
+  const handleCloseStory = useCallback(() => {
+    setStoryOpen(false);
+  }, []);
 
   return (
     <View style={{ flex:1 }}>
       <SearchHeader
         topOffset={top}
         placeholder="Recherche"
-        activeType={active}
-        onChangeType={setActive}
-        onPressSearch={()=> navigateToSearchModal(navigation)}
-        onPressFilters={()=> setShowFilters(true)}
+        onPressSearch={handleSearchPress}
+        onPressFilters={handleFiltersPress}
         onMeasuredHeight={setHeaderH}
       />
 
       <WorldMapWeb
         events={data}
-        headerOffset={top + headerH}
-        onMarkerPress={(id)=> {
-          const ev = data.find(e => e.id === id) || all.find(e => e.id === id);
-          if (ev) setSelectedEvent(ev);
-        }}
+        onMarkerPress={handleMarkerPress}
       />
 
       <CardCarousel
         data={data}
         selectedId={selectedId}
-        onFocus={(id)=> setSelectedId(id)}
-        onPress={(ev)=> setSelectedEvent(ev)}
+        onFocus={setSelectedId}
+        onPress={handleCarouselPress}
         bottomOffset={carouselBottom}
         compact
       />
@@ -68,23 +105,23 @@ export default function MapScreen({ navigation }: any){
       <EventDetailsSheet
         visible={!!selectedEvent}
         event={selectedEvent}
-        onClose={()=> setSelectedEvent(null)}
-        onOpenStory={(i, stories)=> { setStoryIndex(i); setStoryOpen(true); }}
+        onClose={handleCloseEvent}
+        onOpenStory={handleOpenStory}
       />
 
       <FilterSheet
         visible={showFilters}
         value={filters}
         onChange={setFilters}
-        onClose={()=> setShowFilters(false)}
-        onApply={()=> setShowFilters(false)}
+        onClose={handleCloseFilters}
+        onApply={handleApplyFilters}
       />
 
       <StoryModal
         visible={storyOpen}
         data={data}
         index={storyIndex}
-        onClose={()=> setStoryOpen(false)}
+        onClose={handleCloseStory}
       />
 
       {/* Désactive la zone cliquable sous le header transparent */}

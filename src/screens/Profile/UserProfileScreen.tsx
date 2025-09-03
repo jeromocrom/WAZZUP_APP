@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
   h2:{ fontWeight:'900', fontSize:16 },
   p:{ fontWeight:'700', color:'#222' },
   outBtn:{ borderWidth:1.5, borderColor:'#000', borderRadius:12, paddingHorizontal:12, paddingVertical:8, backgroundColor:'#FFF' },
+  btnTxt:{ fontWeight:'900' },
   evRow:{ paddingVertical:8, borderTopWidth:1, borderColor:'#000', marginTop:6 },
   evTitle:{ fontWeight:'900' },
   evMeta:{ fontWeight:'700', color:'#333' }
