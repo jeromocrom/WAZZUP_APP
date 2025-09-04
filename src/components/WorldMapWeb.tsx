@@ -6,6 +6,7 @@ import type { WazzupEvent } from '@/types';
 type Props = {
   events: WazzupEvent[];
   onMarkerPress?: (id: string)=> void;
+  headerOffset?: number;
 };
 
 const HTML = `

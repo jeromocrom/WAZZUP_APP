@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { View, Platform } from 'react-native';
 import { useOverlayOffsets } from '@/utils/overlay';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import events from '@/events.json';
@@ -10,6 +10,7 @@ import FilterSheet, { Filters } from '@/components/FilterSheet';
 import CardCarousel from '@/components/CardCarousel';
 import StoryModal from '@/components/StoryModal';
 import WorldMapWeb from '@/components/WorldMapWeb';
+import WorldMapRN from '@/components/WorldMapRN';
 import { navigateToSearchModal } from '@/navigation/searchNav';
 
 export default function MapScreen({ navigation }: any){
@@ -47,14 +48,25 @@ export default function MapScreen({ navigation }: any){
         onMeasuredHeight={setHeaderH}
       />
 
-      <WorldMapWeb
-        events={data}
-        headerOffset={top + headerH}
-        onMarkerPress={(id)=> {
-          const ev = data.find(e => e.id === id) || all.find(e => e.id === id);
-          if (ev) setSelectedEvent(ev);
-        }}
-      />
+      {Platform.OS === 'web' ? (
+        <WorldMapWeb
+          events={data}
+          headerOffset={top + headerH}
+          onMarkerPress={(id)=> {
+            const ev = data.find(e => e.id === id) || all.find(e => e.id === id);
+            if (ev) setSelectedEvent(ev);
+          }}
+        />
+      ) : (
+        <WorldMapRN
+          events={data}
+          headerOffset={top + headerH}
+          onMarkerPress={(id)=> {
+            const ev = data.find(e => e.id === id) || all.find(e => e.id === id);
+            if (ev) setSelectedEvent(ev);
+          }}
+        />
+      )}
 
       <CardCarousel
         data={data}

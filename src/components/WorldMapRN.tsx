@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text } from 'react-native';
 import ClusteredMapView from 'react-native-map-clustering';
-import MapView, { Marker, Region } from 'react-native-maps';
+import { Marker, Region } from 'react-native-maps';
 import type { WazzupEvent } from '@/types';
 
 type Props = {
@@ -50,11 +50,13 @@ export default function WorldMapRN({ events, onMarkerPress, headerOffset = 0 }: 
             coordinate={{ latitude: ev.lat, longitude: ev.lng }}
             onPress={() => onMarkerPress?.(ev.id)}
           >
-            {/* TODO: remplacer par un vrai MarkerIcon pour coller à la DA WAZZUP */}
             <View style={{
               backgroundColor: '#FFD300',
-              borderColor: '#000', borderWidth: 2, borderRadius: 999,
-              paddingHorizontal: 10, paddingVertical: 6
+              borderColor: '#000', 
+              borderWidth: 2, 
+              borderRadius: 999,
+              paddingHorizontal: 10, 
+              paddingVertical: 6
             }}>
               <Text style={{ fontWeight: '900' }}>{ev.title}</Text>
             </View>
