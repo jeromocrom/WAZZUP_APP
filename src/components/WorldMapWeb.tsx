@@ -51,11 +51,13 @@ const HTML = `
     /* Remove event type specific colors - using uniform yellow circles */
     .pin.shape-hex { border-radius: 50%; }
     .pin .badge {
-      position: absolute; top: -3px; right: -3px;
+      position: absolute; top: -6px; right: -6px;
       background: var(--wz-white); border: 2px solid var(--wz-black);
-      border-radius: 999px; padding: 3px 7px; font-size: 9px; font-weight: 900;
+      border-radius: 999px; padding: 2px 5px; font-size: 8px; font-weight: 900;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15);
       color: var(--wz-black);
+      transform: scale(0.9);
+      z-index: 10;
     }
     .pin.live .badge { 
       background: var(--wz-red); 

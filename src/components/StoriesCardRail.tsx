@@ -37,7 +37,7 @@ export default function StoriesCardRail({
             </Pressable>
           )}
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 10, gap: 10 }}
+          contentContainerStyle={{ paddingHorizontal: 10, gap: 8 }}
         />
       </View>
     </View>
@@ -51,10 +51,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8
   },
   card:{
-    width: 140, height: 120, borderRadius: 10, borderWidth: 1, borderColor:'rgba(0,0,0,0.15)', overflow:'hidden', backgroundColor:'#FFF'
+    width: 120, height: 80, borderRadius: 10, borderWidth: 1, borderColor:'rgba(0,0,0,0.15)', overflow:'hidden', backgroundColor:'#FFF'
   },
   img:{ width:'100%', height:'60%' },
-  info:{ flex:1, paddingHorizontal:6, paddingVertical:4 },
-  title:{ fontWeight:'700', fontSize:12 },
-  by:{ fontWeight:'600', color:'#555', fontSize:10 }
+  info:{ flex:1, paddingHorizontal:4, paddingVertical:3 },
+  title:{ fontWeight:'700', fontSize:10 },
+  by:{ fontWeight:'600', color:'#555', fontSize:9 }
 });
