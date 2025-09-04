@@ -17,6 +17,7 @@ type Props = {
   onClose: () => void;
   onOpenStory?: (index: number, stories: any[]) => void;
   onNavigateProfile?: (type: 'organizer'|'artist', id: string)=>void;
+  onCenterMap?: (eventId: string) => void;
   devFallbacks?: boolean;
 };
 
@@ -51,7 +52,7 @@ function priceLabel(adapted: any, raw: any){
 }
 
 export default function EventDetailsSheet({
-  visible, event, onClose, onOpenStory, onNavigateProfile, devFallbacks = true
+  visible, event, onClose, onOpenStory, onNavigateProfile, onCenterMap, devFallbacks = true
 }: Props){
   // ---------- Hooks ALWAYS called (no conditional early-return before hooks) ----------
   const insets = useSafeAreaInsets();
@@ -66,6 +67,10 @@ export default function EventDetailsSheet({
   useEffect(() => {
     if (visible) {
       setIsFullyOpen(false);
+      // Center map on event when opening sheet
+      if (onCenterMap && event?.id) {
+        onCenterMap(event.id);
+      }
       Animated.timing(translateY, {
         toValue: SNAP_HALF,
         duration: 240,
@@ -80,7 +85,7 @@ export default function EventDetailsSheet({
         useNativeDriver: true
       }).start(() => setIsFullyOpen(false));
     }
-  }, [visible, SNAP_HALF]);
+  }, [visible, SNAP_HALF, onCenterMap, event?.id]);
 
   const pan = useRef(
     PanResponder.create({
@@ -210,16 +215,39 @@ export default function EventDetailsSheet({
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Cover */}
-          {shouldRenderContent && cover && (
-            <View style={{ paddingHorizontal: 12, paddingTop: 8 }}>
-              <Image source={{ uri: cover }} style={styles.cover} resizeMode="cover" />
-            </View>
+          {/* COMPACT VIEW (50%) - Essential info only */}
+          {!isFullyOpen && shouldRenderContent && (
+            <>
+              {/* When & Address */}
+              <Section title="Horaires & Lieu">
+                <Text style={styles.text}>{whenRange}</Text>
+                <View style={{ height: 8 }} />
+                <Text style={styles.text}>{addrLine}</Text>
+                <View style={{ height: 8 }} />
+                <View style={{ flexDirection:'row', gap:8, flexWrap:'wrap' }}>
+                  <Chip onPress={()=> openMaps(a, event)}>🧭 Itinéraire</Chip>
+                  {!!a?.venue && <Chip>📍 {a.venue}</Chip>}
+                </View>
+              </Section>
+
+              {/* Practical info */}
+              <Section title="Infos pratiques">
+                <Row label="Tarifs" value={priceText} />
+              </Section>
+            </>
           )}
 
-          {/* When & Address */}
-          {shouldRenderContent && (
+          {/* FULL VIEW (100%) - All content */}
+          {isFullyOpen && shouldRenderContent && (
             <>
+              {/* Cover */}
+              {cover && (
+                <View style={{ paddingHorizontal: 12, paddingTop: 8 }}>
+                  <Image source={{ uri: cover }} style={styles.cover} resizeMode="cover" />
+                </View>
+              )}
+
+              {/* When & Address */}
               <Section title="Horaires">
                 <Text style={styles.text}>{whenRange}</Text>
               </Section>
@@ -231,84 +259,80 @@ export default function EventDetailsSheet({
                   {!!a?.venue && <Chip>📍 {a.venue}</Chip>}
                 </View>
               </Section>
+
+              {/* Photos */}
+              {!!photos?.length && (
+                <Section title="Photos">
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
+                    {photos!.map((uri: string, i: number) => (
+                      <Image key={i} source={{ uri }} style={styles.photo} resizeMode="cover" />
+                    ))}
+                  </ScrollView>
+                </Section>
+              )}
+
+              {/* Stories */}
+              {!!stories?.length && (
+                <Section title="Stories">
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                    {stories!.map((s: any, i: number) => (
+                      <Pressable key={i} onPress={()=> onOpenStory?.(i, stories!)} style={styles.storyBubble}>
+                        <Text style={{ fontWeight:'900' }}>🎬</Text>
+                      </Pressable>
+                    ))}
+                  </ScrollView>
+                  <Text style={[styles.text, { marginTop: 6 }]}>Tape sur une bulle pour lire la story.</Text>
+                </Section>
+              )}
+
+              {/* Organizer */}
+              {!!organizer && (
+                <Section title="Organisateur">
+                  <Pressable style={styles.profileRow} onPress={()=> onNavigateProfile?.('organizer', organizer.id || organizer.name || '')}>
+                    {organizer.avatar ? <Image source={{ uri: organizer.avatar }} style={styles.avatar} /> : <View style={[styles.avatar, styles.avatarFallback]} />}
+                    <View style={{ flex:1 }}>
+                      <Text style={styles.profileName}>{organizer.name || 'Organisateur'}</Text>
+                    </View>
+                    <Text style={styles.link}>Voir le profil ›</Text>
+                  </Pressable>
+                </Section>
+              )}
+
+              {/* Artists */}
+              {!!artists?.length && (
+                <Section title="Artistes & collab">
+                  <View style={styles.artistGrid}>
+                    {artists.map((p:any)=> (
+                      <Pressable key={String(p.id)} style={styles.artistChip} onPress={()=> onNavigateProfile?.('artist', p.id || p.name || '')}>
+                        {p.avatar ? <Image source={{ uri: p.avatar }} style={styles.artistAvatar} /> : <View style={[styles.artistAvatar, styles.avatarFallback]} />}
+                        <Text numberOfLines={1} style={styles.artistName}>{p.name || 'Artiste'}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </Section>
+              )}
+
+              {/* Thematic / Type */}
+              {!!themeType && (
+                <Section title="Thématique & type">
+                  <View style={{ flexDirection:'row', flexWrap:'wrap', gap:8 }}>
+                    {String(themeType).split('•').map((t, i)=>( <Chip key={i}>{t.trim()}</Chip> ))}
+                  </View>
+                </Section>
+              )}
+
+              {/* Practical info */}
+              <Section title="Infos pratiques">
+                <Row label="Tarifs" value={priceText} />
+              </Section>
+
+              {/* About / Description */}
+              <Section title="À propos">
+                <Text style={styles.desc}>
+                  {(event as any)?.description || (event as any)?.longDescription || 'Description à venir.'}
+                </Text>
+              </Section>
             </>
-          )}
-
-          {/* Photos */}
-          {shouldRenderContent && !!photos?.length && (
-            <Section title="Photos">
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
-                {photos!.map((uri: string, i: number) => (
-                  <Image key={i} source={{ uri }} style={styles.photo} resizeMode="cover" />
-                ))}
-              </ScrollView>
-            </Section>
-          )}
-
-          {/* Stories */}
-          {shouldRenderContent && !!stories?.length && (
-            <Section title="Stories">
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-                {stories!.map((s: any, i: number) => (
-                  <Pressable key={i} onPress={()=> onOpenStory?.(i, stories!)} style={styles.storyBubble}>
-                    <Text style={{ fontWeight:'900' }}>🎬</Text>
-                  </Pressable>
-                ))}
-              </ScrollView>
-              <Text style={[styles.text, { marginTop: 6 }]}>Tape sur une bulle pour lire la story.</Text>
-            </Section>
-          )}
-
-          {/* Organizer */}
-          {shouldRenderContent && !!organizer && (
-            <Section title="Organisateur">
-              <Pressable style={styles.profileRow} onPress={()=> onNavigateProfile?.('organizer', organizer.id || organizer.name || '')}>
-                {organizer.avatar ? <Image source={{ uri: organizer.avatar }} style={styles.avatar} /> : <View style={[styles.avatar, styles.avatarFallback]} />}
-                <View style={{ flex:1 }}>
-                  <Text style={styles.profileName}>{organizer.name || 'Organisateur'}</Text>
-                </View>
-                <Text style={styles.link}>Voir le profil ›</Text>
-              </Pressable>
-            </Section>
-          )}
-
-          {/* Artists */}
-          {shouldRenderContent && !!artists?.length && (
-            <Section title="Artistes & collab">
-              <View style={styles.artistGrid}>
-                {artists.map((p:any)=> (
-                  <Pressable key={String(p.id)} style={styles.artistChip} onPress={()=> onNavigateProfile?.('artist', p.id || p.name || '')}>
-                    {p.avatar ? <Image source={{ uri: p.avatar }} style={styles.artistAvatar} /> : <View style={[styles.artistAvatar, styles.avatarFallback]} />}
-                    <Text numberOfLines={1} style={styles.artistName}>{p.name || 'Artiste'}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </Section>
-          )}
-
-          {/* Thematic / Type */}
-          {shouldRenderContent && !!themeType && (
-            <Section title="Thématique & type">
-              <View style={{ flexDirection:'row', flexWrap:'wrap', gap:8 }}>
-                {String(themeType).split('•').map((t, i)=>( <Chip key={i}>{t.trim()}</Chip> ))}
-              </View>
-            </Section>
-          )}
-
-          {/* Practical info */}
-          {shouldRenderContent && (
-            <Section title="Infos pratiques">
-              <Row label="Tarifs" value={priceText} />
-            </Section>
-          )}
-
-          {/* About / Description */}
-          {shouldRenderContent && (
-            <Section title="À propos">
-              <Text style={styles.desc}>
-                {(event as any)?.description || (event as any)?.longDescription || 'Description à venir.'}
-              </Text>
-            </Section>
           )}
         </ScrollView>
 

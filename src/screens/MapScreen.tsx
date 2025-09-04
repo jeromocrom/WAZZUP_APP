@@ -84,6 +84,13 @@ export default function MapScreen({ navigation }: any){
     setStoryOpen(false);
   }, []);
 
+  // Handle centering map on event
+  const handleCenterMap = useCallback((eventId: string) => {
+    setCenterEventId(eventId);
+    // Reset centering after animation completes
+    setTimeout(() => setCenterEventId(null), 1000);
+  }, []);
+
   return (
     <View style={{ flex:1 }}>
       <SearchHeader
@@ -116,6 +123,7 @@ export default function MapScreen({ navigation }: any){
         event={selectedEvent}
         onClose={handleCloseEvent}
         onOpenStory={handleOpenStory}
+        onCenterMap={handleCenterMap}
       />
 
       <FilterSheet
