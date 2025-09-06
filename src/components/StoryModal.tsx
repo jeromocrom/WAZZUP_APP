@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Modal, View, Text, StyleSheet, Pressable, Animated, ImageBackground } from 'react-native';
+import { Modal, View, Text, StyleSheet, Pressable, Animated, ImageBackground, PanResponder } from 'react-native';
 import type { WazzupEvent } from '@/types';
 import { tokens } from '@/theme/tokens';
 import { adaptEvent } from '@/utils/eventAdapter';
@@ -8,6 +8,7 @@ export default function StoryModal({ visible, data, index=0, onClose }:{ visible
   const [i, setI] = useState(index);
   const [storyIndex, setStoryIndex] = useState(0);
   const bar = useRef(new Animated.Value(0)).current;
+  const translateX = useRef(new Animated.Value(0)).current;
 
   useEffect(() => { 
     if (visible) {
@@ -24,6 +25,7 @@ export default function StoryModal({ visible, data, index=0, onClose }:{ visible
   useEffect(() => {
     if (!visible || !currentStory) return;
     bar.setValue(0);
+    translateX.setValue(0);
     const anim = Animated.timing(bar, { toValue: 1, duration: 4000, useNativeDriver: false });
     anim.start(({ finished }) => { 
       if (finished) {
@@ -36,6 +38,49 @@ export default function StoryModal({ visible, data, index=0, onClose }:{ visible
     });
     return () => anim.stop();
   }, [i, storyIndex, visible, currentStory]);
+
+  // Enhanced pan responder for swipe gestures
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gesture) => {
+        return Math.abs(gesture.dx) > 20 && Math.abs(gesture.dx) > Math.abs(gesture.dy);
+      },
+      onPanResponderMove: (_, gesture) => {
+        translateX.setValue(gesture.dx);
+      },
+      onPanResponderRelease: (_, gesture) => {
+        const threshold = 100;
+        
+        if (gesture.dx > threshold) {
+          // Swipe right - previous story
+          Animated.timing(translateX, {
+            toValue: 300,
+            duration: 200,
+            useNativeDriver: true,
+          }).start(() => {
+            prev();
+            translateX.setValue(0);
+          });
+        } else if (gesture.dx < -threshold) {
+          // Swipe left - next story  
+          Animated.timing(translateX, {
+            toValue: -300,
+            duration: 200,
+            useNativeDriver: true,
+          }).start(() => {
+            next();
+            translateX.setValue(0);
+          });
+        } else {
+          // Return to center
+          Animated.spring(translateX, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   function next(){
     if (i < data.length-1) {
@@ -62,48 +107,75 @@ export default function StoryModal({ visible, data, index=0, onClose }:{ visible
 
   return (
     <Modal visible={visible} transparent onRequestClose={onClose} animationType="fade" statusBarTranslucent>
-      <ImageBackground 
-        source={{ uri: currentStory }} 
-        style={styles.backdrop}
-        resizeMode="cover"
+      <Animated.View 
+        style={[styles.container, { transform: [{ translateX }] }]}
+        {...panResponder.panHandlers}
       >
-        <View style={styles.overlay} />
-        
-        {/* Progress bars for multiple stories */}
-        <View style={styles.progressContainer}>
-          {stories.map((_, idx) => (
-            <View key={idx} style={styles.progressBar}>
-              <Animated.View 
-                style={[
-                  styles.progressFill, 
-                  { 
-                    width: idx === storyIndex ? width : idx < storyIndex ? '100%' : '0%'
-                  }
-                ]} 
-              />
-            </View>
-          ))}
-        </View>
-        
-        <Pressable style={styles.left} onPress={prev} />
-        <Pressable style={styles.right} onPress={next} />
-        
-        <View style={styles.content}>
-          <Text style={styles.title} numberOfLines={2}>{ev.title}</Text>
-          <Text style={styles.sub}>{ev.venue} • {ev.city}</Text>
-          <Text style={styles.story}>📍 Histoire {storyIndex + 1} / {stories.length}</Text>
-          <View style={{ height: 16 }} />
-          <Pressable style={styles.cta} onPress={onClose}>
-            <Text style={styles.ctaText}>Découvrir l'événement</Text>
-          </Pressable>
-        </View>
-      </ImageBackground>
+        <ImageBackground 
+          source={{ uri: currentStory }} 
+          style={styles.backdrop}
+          resizeMode="cover"
+        >
+          <View style={styles.overlay} />
+          
+          {/* Progress bars for multiple stories */}
+          <View style={styles.progressContainer}>
+            {stories.map((_, idx) => (
+              <View key={idx} style={styles.progressBar}>
+                <Animated.View 
+                  style={[
+                    styles.progressFill, 
+                    { 
+                      width: idx === storyIndex ? width : idx < storyIndex ? '100%' : '0%'
+                    }
+                  ]} 
+                />
+              </View>
+            ))}
+          </View>
+          
+          {/* Navigation buttons */}
+          <View style={styles.navigationContainer}>
+            <Pressable 
+              style={[styles.navButton, styles.navButtonLeft]}
+              onPress={prev}
+            >
+              <Text style={styles.navButtonText}>‹</Text>
+            </Pressable>
+            <Pressable 
+              style={[styles.navButton, styles.navButtonRight]}
+              onPress={next}
+            >
+              <Text style={styles.navButtonText}>›</Text>
+            </Pressable>
+          </View>
+          
+          {/* Tap areas for navigation */}
+          <Pressable style={styles.left} onPress={prev} />
+          <Pressable style={styles.right} onPress={next} />
+          
+          <View style={styles.content}>
+            <Text style={styles.title} numberOfLines={2}>{ev.title}</Text>
+            <Text style={styles.sub}>{ev.venue} • {ev.city}</Text>
+            <Text style={styles.story}>📍 Histoire {storyIndex + 1} / {stories.length}</Text>
+            <View style={{ height: 16 }} />
+            <Pressable style={styles.cta} onPress={onClose}>
+              <Text style={styles.ctaText}>Découvrir l'événement</Text>
+            </Pressable>
+          </View>
+        </ImageBackground>
+      </Animated.View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: { flex: 1 },
+  container: { 
+    flex: 1 
+  },
+  backdrop: { 
+    flex: 1 
+  },
   overlay: { 
     ...StyleSheet.absoluteFillObject, 
     backgroundColor: 'rgba(0,0,0,0.4)' 
@@ -127,8 +199,47 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.color.primary, 
     borderRadius: 999 
   },
-  left: { position: 'absolute', left: 0, top: 0, bottom: 0, width: '40%' },
-  right: { position: 'absolute', right: 0, top: 0, bottom: 0, width: '60%' },
+  navigationContainer: {
+    position: 'absolute',
+    top: 100,
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    zIndex: 10,
+  },
+  navButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navButtonLeft: {},
+  navButtonRight: {},
+  navButtonText: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#FFF',
+    fontFamily: 'Montserrat', // As requested in requirements
+  },
+  left: { 
+    position: 'absolute', 
+    left: 0, 
+    top: 0, 
+    bottom: 0, 
+    width: '40%' 
+  },
+  right: { 
+    position: 'absolute', 
+    right: 0, 
+    top: 0, 
+    bottom: 0, 
+    width: '60%' 
+  },
   content: { 
     position: 'absolute', 
     bottom: 60, 
@@ -140,8 +251,18 @@ const styles = StyleSheet.create({
     borderWidth: 2, 
     borderColor: 'rgba(255,255,255,0.8)' 
   },
-  title: { fontWeight: '900', fontSize: 22, color: '#000' },
-  sub: { color: '#666', marginTop: 4, fontSize: 14 },
+  title: { 
+    fontWeight: '900', 
+    fontSize: 22, 
+    color: '#000',
+    fontFamily: 'Montserrat', // As requested
+  },
+  sub: { 
+    color: '#666', 
+    marginTop: 4, 
+    fontSize: 14,
+    fontFamily: 'Poppins', // As requested
+  },
   story: { 
     color: '#888', 
     fontSize: 12, 
@@ -159,6 +280,7 @@ const styles = StyleSheet.create({
   ctaText: { 
     fontWeight: '900', 
     fontSize: 16, 
-    color: '#000' 
+    color: '#000',
+    fontFamily: 'Montserrat', // As requested
   }
 });

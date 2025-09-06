@@ -10,6 +10,7 @@ import FilterSheet, { Filters } from '@/components/FilterSheet';
 import CardCarousel from '@/components/CardCarousel';
 import StoryModal from '@/components/StoryModal';
 import WorldMapWeb from '@/components/WorldMapWeb';
+import FloatingAddButton from '@/components/FloatingAddButton';
 import { navigateToSearchModal } from '@/navigation/searchNav';
 
 export default function MapScreen({ navigation }: any){
@@ -84,6 +85,11 @@ export default function MapScreen({ navigation }: any){
     setStoryOpen(false);
   }, []);
 
+  const handleCreateEvent = useCallback(() => {
+    // TODO: Navigate to event creation screen
+    console.log('Create event pressed');
+  }, []);
+
   // Handle centering map on event
   const handleCenterMap = useCallback((eventId: string) => {
     setCenterEventId(eventId);
@@ -143,6 +149,9 @@ export default function MapScreen({ navigation }: any){
 
       {/* Désactive la zone cliquable sous le header transparent */}
       <View pointerEvents="none" style={{ position:'absolute', left:0, right:0, top:0, height: top + headerH }} />
+      
+      {/* Floating add button */}
+      <FloatingAddButton onPress={handleCreateEvent} />
     </View>
   );
 }

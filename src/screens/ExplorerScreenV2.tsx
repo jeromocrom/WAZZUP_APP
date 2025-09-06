@@ -8,7 +8,7 @@ import EventCard from '@/components/EventCard';
 import EventDetailsSheet from '@/components/EventDetailsSheet';
 import FilterSheet, { Filters } from '@/components/FilterSheet';
 import StoryModal from '@/components/StoryModal';
-import WorldMapWeb from '@/components/WorldMapWeb';
+import FloatingAddButton from '@/components/FloatingAddButton';
 import { navigateToSearchModal } from '@/navigation/searchNav';
 import StoriesCardRail from '@/components/StoriesCardRail';
 
@@ -36,7 +36,12 @@ export default function ExplorerScreenV2({ navigation }: any){
     return base;
   }, [active, filters]);
 
-  const contentTop = top + headerH + (storiesH || 160) + 120 + 24; // Added 120 for map + 16 for margins
+  const handleCreateEvent = () => {
+    // TODO: Navigate to event creation screen
+    console.log('Create event pressed from Explorer');
+  };
+
+  const contentTop = top + headerH + (storiesH || 160) + 24; // Removed map height (120) from calculation
 
   return (
     <View style={{ flex:1 }}>
@@ -59,17 +64,6 @@ export default function ExplorerScreenV2({ navigation }: any){
           onOpenStory={(i)=> { setStoryIndex(i); setStoryOpen(true); }}
           onMeasuredHeight={setStoriesH}
         />
-        
-        {/* Small map for stories events */}
-        <View style={{ height: 120, marginHorizontal: 12, marginTop: 8, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(0,0,0,0.1)' }}>
-          <WorldMapWeb
-            events={boosted}
-            onMarkerPress={(id) => {
-              const ev = boosted.find(e => e.id === id);
-              if (ev) setSelectedEvent(ev);
-            }}
-          />
-        </View>
       </View>
 
       {/* Liste — décalée sous header + stories */}
@@ -102,6 +96,9 @@ export default function ExplorerScreenV2({ navigation }: any){
         index={storyIndex}
         onClose={()=> setStoryOpen(false)}
       />
+      
+      {/* Floating add button */}
+      <FloatingAddButton onPress={handleCreateEvent} />
     </View>
   );
 }

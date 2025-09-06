@@ -214,6 +214,20 @@ export default function EventDetailsSheet({
           scrollEventThrottle={16}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          onScroll={(event) => {
+            const { contentOffset } = event.nativeEvent;
+            // If user scrolls up while in half mode, expand to full
+            if (!isFullyOpen && contentOffset.y < -20) {
+              setIsFullyOpen(true);
+              Animated.spring(translateY, {
+                toValue: SNAP_FULL,
+                useNativeDriver: true,
+                damping: 18,
+                stiffness: 220,
+                mass: 0.8
+              }).start();
+            }
+          }}
         >
           {/* COMPACT VIEW (50%) - Essential info only */}
           {!isFullyOpen && shouldRenderContent && (

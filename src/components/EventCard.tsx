@@ -75,6 +75,17 @@ function EventCard({
     return venue + city;
   }, [a.venue, a.city]);
 
+  // Add fictive story indicators
+  const hasStories = useMemo(() => {
+    // Simulating story content - in a real app this would come from the event data
+    return Math.random() > 0.4; // ~60% of events have stories
+  }, [a.id]);
+
+  const storyCount = useMemo(() => {
+    // Simulate 1-5 stories per event
+    return hasStories ? Math.floor(Math.random() * 5) + 1 : 0;
+  }, [hasStories, a.id]);
+
   return (
     <Pressable onPress={handlePress} style={styles.card}>
       {cover ? (
@@ -90,6 +101,14 @@ function EventCard({
         <Text style={styles.meta} numberOfLines={1}>
           {metaText}
         </Text>
+        
+        {/* Story preview indicator */}
+        {hasStories && (
+          <View style={styles.storyIndicator}>
+            <Text style={styles.storyIcon}>📹</Text>
+            <Text style={styles.storyText}>{storyCount} {storyCount === 1 ? 'story' : 'stories'}</Text>
+          </View>
+        )}
       </View>
 
       {/* Star en overlay en haut à droite */}
@@ -125,5 +144,19 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: '#000',
     textAlign: 'center'
+  },
+  storyIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+    gap: 4,
+  },
+  storyIcon: {
+    fontSize: 12,
+  },
+  storyText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#666',
   }
 });
